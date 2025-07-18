@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Malla Interactiva - Ing. Civil Informática</title>
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+  <style>
+    :root {
+      --bg-light: #eaf1f8;
+      --bg-dark: #1e1e1e;
+      --icon-color-light: #ffc107;
+      --icon-color-dark: #90caf9;
+      --programacion: #4a86e8;
+      --matematicas: #e06666;
+      --fisica: #6aa84f;
+      --ingenieria: #8e7cc3;
+      --humanidades: #f6b26b;
+      --optativos: #d5a6bd;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      margin: 0;
+      transition: background-color 0.5s ease, color 0.5s ease;
+      background-color: var(--bg-light);
+      color: #111;
+      min-height: 100vh;
+    }
+
+    body.active {
+      background-color: var(--bg-dark);
+      color: #eee;
+    }
+
+    body.active .aprobado {
+      background: #2e7d32;
+      color: #fff;
+    }
+
+    body.active .disponible {
+      background: #fbc02d;
+      color: #000;
+    }
+
+    body.active .bloqueado {
+      background: #555;
+      color: #aaa;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 0 10px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    .progress-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 800px;
+      padding: 0 10px;
+    }
+
+    .stat-item {
+      text-align: center;
+      background: rgba(0, 0, 0, 0.05);
+      padding: 8px 15px;
+      border-radius: 8px;
+      font-weight: 500;
+      min-width: 120px;
+    }
+
+    body.active .stat-item {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .legend {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px 20px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      margin: 0 5px;
+    }
+
+    .legend .cuadro {
+      width: 14px;
+      height: 14px;
+      display: inline-block;
+      border-radius: 3px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    .progress {
+      margin: 0 auto;
+      width: 100%;
+      max-width: 800px;
+      background-color: #cfd8dc;
+      border-radius: 10px;
+      overflow: hidden;
+      height: 20px;
+      box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.15);
+      position: relative;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #4caf50, #8bc34a);
+      width: 0%;
+      transition: width 0.5s ease-in-out;
+      position: relative;
+    }
+
+    .progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 12px;
+      font-weight: bold;
+      color: #000;
+      text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+      pointer-events: none;
+    }
+
+    body.active .progress-text {
+      color: #fff;
+      text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .controls button {
+      padding: 8px 16px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 500;
+    }
+
+    .controls button:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .controls button:active {
+      transform: translateY(0);
+    }
+
+    .search-container {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+
+    .search-container input {
+      width: 100%;
+      padding: 10px 15px;
+      border-radius: 30px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      padding-left: 40px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    body.active .search-container input {
+      background-color: #2a2a2a;
+      border-color: #444;
+      color: #eee;
+    }
+
+    .search-container ion-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #777;
+    }
+
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      padding-bottom: 20px;
+    }
+
+    .semestre {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      min-width: 240px;
+      max-width: 300px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      flex: 1 1 240px;
+      transition: transform 0.3s ease;
+    }
+
+    body.active .semestre {
+      background: #2a2a2a;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+    }
+
+    .semestre h3 {
+      text-align: center;
+      color: #34495e;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #eee;
+    }
+
+    body.active .semestre h3 {
+      color: #90caf9;
+      border-bottom: 2px solid #444;
+    }
+
+    .ramo {
+      margin: 6px 0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      border-left: 4px solid transparent;
+    }
+
+    .ramo[data-area="programacion"] {
+      border-left-color: var(--programacion);
+    }
+    
+    .ramo[data-area="matematicas"] {
+      border-left-color: var(--matematicas);
+    }
+    
+    .ramo[data-area="fisica"] {
+      border-left-color: var(--fisica);
+    }
+    
+    .ramo[data-area="ingenieria"] {
+      border-left-color: var(--ingenieria);
+    }
+    
+    .ramo[data-area="humanidades"] {
+      border-left-color: var(--humanidades);
+    }
+    
+    .ramo[data-area="optativos"] {
+      border-left-color: var(--optativos);
+    }
+
+    .ramo:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .ramo:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 110%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0.95;
+      pointer-events: none;
+      z-index: 10;
+      max-width: 300px;
+      text-align: center;
+    }
+
+    .bloqueado {
+      background: #ccc;
+      color: #666;
+      cursor: not-allowed;
+    }
+
+    .disponible {
+      background: #ffe08a;
+    }
+
+    .aprobado {
+      background: #98fb98;
+    }
+
+    .creditos {
+      font-size: 11px;
+      font-weight: bold;
+      margin-top: 5px;
+      opacity: 0.8;
+    }
+
+    .desbloqueado {
+      animation: fadeInScale 0.8s ease forwards;
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    @keyframes fadeInScale {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .area-filter {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .area-btn {
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: none;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      opacity: 0.7;
+    }
+
+    .area-btn.active {
+      opacity: 1;
+      transform: scale(1.05);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .area-btn[data-area="programacion"] {
+      background-color: var(--programacion);
+      color: white;
+    }
+    
+    .area-btn[data-area="matematicas"] {
+      background-color: var(--matematicas);
+      color: white;
+    }
+    
+    .area-btn[data-area="fisica"] {
+      background-color: var(--fisica);
+      color: white;
+    }
+    
+    .area-btn[data-area="ingenieria"] {
+      background-color: var(--ingenieria);
+      color: white;
+    }
+    
+    .area-btn[data-area="humanidades"] {
+      background-color: var(--humanidades);
+      color: #333;
+    }
+    
+    .area-btn[data-area="optativos"] {
+      background-color: var(--optativos);
+      color: #333;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .semestre {
+        width: 100%;
+        max-width: 100%;
+      }
+      
+      header {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .controls button {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+      }
+    }
+
+    .dark-mode {
+      position: static;
+      float: right;
+      margin: 0;
+      width: 60px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      border-radius: 999px;
+      background-color: #dfdede;
+      cursor: pointer;
+      transition: background-color 0.5s ease;
+      z-index: auto;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      user-select: none;
+    }
+
+    body.active .dark-mode {
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.4);
+      background-color: white;
+    }
+
+    .dark-mode .circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background-color: white;
+      transform: translateX(5%);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.5s ease, background-color 0.5s ease;
+    }
+
+    body.active .circle {
+      transform: translateX(30px);
+      background-color: #2a2a2c;
+    }
+
+    .dark-mode .circle ion-icon {
+      width: 24px;
+      height: 24px;
+      position: absolute;
+      transition: transform 0.5s ease;
+    }
+
+    .dark-mode .circle .moon {
+      color: white;
+      transform: translateY(-120%);
+    }
+
+    body.active .circle .moon {
+      transform: translateY(0);
+    }
+
+    .dark-mode .circle .sun {
+      color: #fcde5b;
+    }
+
+    body.active .circle .sun {
+      transform: translateY(120%);
+    }
+    
+    .no-results {
+      text-align: center;
+      padding: 20px;
+      font-style: italic;
+      color: #777;
+      grid-column: 1 / -1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Malla Interactiva - Ing. Civil Informática</h1>
+      <div class="dark-mode" id="theme-toggle">
+        <div class="circle">
+          <ion-icon class="sun" name="sunny"></ion-icon>
+          <ion-icon class="moon" name="moon"></ion-icon>
+        </div>
+      </div>
+    </header>
+
+    <div class="progress-container">
+      <div class="stats">
+        <div class="stat-item" id="total-ramos">Total ramos: 0</div>
+        <div class="stat-item" id="aprobados-ramos">Aprobados: 0</div>
+        <div class="stat-item" id="creditos-total">Créditos: 0/0</div>
+        <div class="stat-item" id="porcentaje">Progreso: 0%</div>
+      </div>
+      
+      <div class="progress">
+        <div class="progress-bar" id="barraProgreso">
+          <div class="progress-text" id="textoProgreso">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><span class="cuadro" style="background:#98fb98;"></span> Aprobado</span>
+      <span><span class="cuadro" style="background:#ffe08a;"></span> Disponible</span>
+      <span><span class="cuadro" style="background:#ccc;"></span> Bloqueado</span>
+      <span><span class="cuadro" style="background:var(--programacion);"></span> Programación</span>
+      <span><span class="cuadro" style="background:var(--matematicas);"></span> Matemáticas</span>
+      <span><span class="cuadro" style="background:var(--fisica);"></span> Física</span>
+      <span><span class="cuadro" style="background:var(--ingenieria);"></span> Ingeniería</span>
+      <span><span class="cuadro" style="background:var(--humanidades);"></span> Humanidades</span>
+      <span><span class="cuadro" style="background:var(--optativos);"></span> Optativos</span>
+    </div>
+
+    <div class="area-filter" id="area-filter">
+      <button class="area-btn active" data-area="all">Todas</button>
+      <button class="area-btn" data-area="programacion">Programación</button>
+      <button class="area-btn" data-area="matematicas">Matemáticas</button>
+      <button class="area-btn" data-area="fisica">Física</button>
+      <button class="area-btn" data-area="ingenieria">Ingeniería</button>
+      <button class="area-btn" data-area="humanidades">Humanidades</button>
+      <button class="area-btn" data-area="optativos">Optativos</button>
+    </div>
+
+    <div class="search-container">
+      <ion-icon name="search-outline"></ion-icon>
+      <input type="text" id="search-input" placeholder="Buscar ramo...">
+    </div>
+
+    <div class="controls">
+      <button onclick="resetear()">
+        <ion-icon name="refresh-outline"></ion-icon>
+        Reiniciar Progreso
+      </button>
+      <button onclick="exportar()">
+        <ion-icon name="download-outline"></ion-icon>
+        Exportar Progreso
+      </button>
+      <button onclick="importar()">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        Importar Progreso
+      </button>
+    </div>
+
+    <div class="grid" id="malla"></div>
+  </div>
+
+  <script>
+    const toggle = document.getElementById("theme-toggle");
+    const body = document.body;
+
+    if (localStorage.getItem("modo") === "dark") {
+      body.classList.add("active");
+    }
+
+    toggle.addEventListener("click", () => {
+      body.classList.toggle("active");
+      const modo = body.classList.contains("active") ? "dark" : "light";
+      localStorage.setItem("modo", modo);
+    });
+
+    // Créditos por ramo (simulado)
+    const creditosRamos = {
+      "Fundamentos de Matemáticas para Ingeniería": 8,
+      "Introducción a la Ingeniería Informática": 4,
+      "Fundamentos de Algoritmos": 6,
+      "Bienestar y Aprendizaje Universitario": 3,
+      "Cálculo Diferencial e Integral": 8,
+      "Álgebra Lineal": 6,
+      "Fundamentos de Programación": 6,
+      "Desarrollo Integral y Comunicación para Ingeniería": 4,
+      "Formación Fundamental": 4,
+      "Física para Ingeniería": 8,
+      "Cálculo en Varias Variables": 8,
+      "Análisis Inteligente de Datos": 6,
+      "Estructura de Datos": 6,
+      "Antropología Cristiana": 4,
+      "Formación Fundamental 2": 4,
+      "Física Electromagnetismo": 8,
+      "Métodos Numéricos": 6,
+      "Análisis y Diseño de Algoritmos": 6,
+      "Programación Avanzada": 6,
+      "Ética Cristiana": 4,
+      "Inglés 1": 4,
+      "Física Moderna": 6,
+      "Autómatas y Compiladores": 6,
+      "Base de Datos": 6,
+      "Inteligencia Artificial": 6,
+      "Hardware y Sistemas Operativos": 6,
+      "Inglés 2": 4,
+      "Ciencia y Tecnología": 4,
+      "Estadística Computacional": 6,
+      "Administración de Empresas": 6,
+      "Modelamiento de Software": 6,
+      "Redes de Computadores": 6,
+      "Inglés 3": 4,
+      "Robótica y Sistemas Autónomos": 6,
+      "Optimización": 6,
+      "Ingeniería de Software": 6,
+      "Ingeniería Web y Móvil": 6,
+      "Computación Paralela y Distribuida": 6,
+      "Inglés 4": 4,
+      "Economía y Finanzas": 6,
+      "Ingeniería de Requerimientos": 6,
+      "Taller de Base de Datos": 6,
+      "Ciberseguridad": 6,
+      "Formación Fundamental 3": 4,
+      "Optativo I": 6,
+      "Administración de proyectos informáticos": 6,
+      "Taller Ingeniería de Software": 6,
+      "Tecnologías Emergentes": 6,
+      "Experiencia del Usuario": 6,
+      "Negocios, innovación y emprendimiento": 6,
+      "Optativo II": 6,
+      "Taller de Formulación de Proyectos Informáticos": 6,
+      "Seminario de Título": 4,
+      "Legislación, Ética y Tecnológica": 4,
+      "Taller de Liderazgo y Trabajo en Equipo": 4,
+      "Optativo III": 6,
+      "Proyecto de Título": 20,
+      "Optativo IV": 6
+    };
+
+    // Categorías por área
+    const ramos = {
+      "Fundamentos de Matemáticas para Ingeniería": { 
+        semestre: 1, 
+        abre: ["Cálculo Diferencial e Integral", "Álgebra Lineal", "Física para Ingeniería"],
+        area: "matematicas"
+      },
+      "Introducción a la Ingeniería Informática": { 
+        semestre: 1, 
+        abre: [],
+        area: "ingenieria"
+      },
+      "Fundamentos de Algoritmos": { 
+        semestre: 1, 
+        abre: ["Fundamentos de Programación"],
+        area: "programacion"
+      },
+      "Bienestar y Aprendizaje Universitario": { 
+        semestre: 1, 
+        abre: [],
+        area: "humanidades"
+      },
+      "Cálculo Diferencial e Integral": { 
+        semestre: 2, 
+        abre: ["Cálculo en Varias Variables", "Análisis Inteligente de Datos"],
+        area: "matematicas"
+      },
+      "Álgebra Lineal": { 
+        semestre: 2, 
+        abre: [],
+        area: "matematicas"
+      },
+      "Fundamentos de Programación": { 
+        semestre: 2, 
+        abre: ["Estructura de Datos", "Métodos Numéricos", "Base de Datos", "Hardware y Sistemas Operativos"],
+        area: "programacion"
+      },
+      "Desarrollo Integral y Comunicación para Ingeniería": { 
+        semestre: 2, 
+        abre: [],
+        area: "humanidades"
+      },
+      "Formación Fundamental": { 
+        semestre: 2, 
+        abre: [],
+        area: "humanidades"
+      },
+      "Física para Ingeniería": { 
+        semestre: 3, 
+        abre: ["Física Electromagnetismo"],
+        area: "fisica"
+      },
+      "Cálculo en Varias Variables": { 
+        semestre: 3, 
+        abre: ["Estadística Computacional"],
+        area: "matematicas"
+      },
+      "Análisis Inteligente de Datos": { 
+        semestre: 3, 
+        abre: [],
+        area: "programacion"
+      },
+      "Estructura de Datos": { 
+        semestre: 3, 
+        abre: ["Programación Avanzada"],
+        area: "programacion"
+      },
+      "Antropología Cristiana": { 
+        semestre: 3, 
+        abre: [],
+        area: "humanidades"
+      },
+      "Formación Fundamental 2": { 
+        semestre: 3, 
+        abre: [],
+        area: "humanidades"
+      },
+      "Física Electromagnetismo": { 
+        semestre: 4, 
+        abre: ["Física Moderna"],
+        area: "fisica"
+      },
+      "Métodos Numéricos": { 
+        semestre: 4, 
+        abre: [],
+        area: "matematicas"
+      },
+      "Análisis y Diseño de Algoritmos": { 
+        semestre: 4, 
+        abre: ["Inteligencia Artificial"],
+        area: "programacion"
+      },
+      "Programación Avanzada": { 
+        semestre: 4, 
+        abre: ["Autómatas y Compiladores"],
+        area: "programacion"
+      },
+      "Ética Cristiana": { 
+        semestre: 4, 
+        abre: [],
+        area: "humanidades"
+      },
+      "Inglés 1": { 
+        semestre: 4, 
+        abre: ["Inglés 2"],
+        area: "humanidades"
+      },
+      "Física Moderna": { 
+        semestre: 5, 
+        abre: [],
+        area: "fisica"
+      },
+      "Autómatas y Compiladores": { 
+        semestre: 5, 
+        abre: ["Redes de Computadores"],
+        area: "programacion"
+      },
+      "Base de Datos": { 
+        semestre: 5, 
+        abre: ["Modelamiento de Software", "Taller de Base de Datos"],
+        area: "programacion"
+      },
+      "Inteligencia Artificial": { 
+        semestre: 5, 
+        abre: [],
+        area: "programacion"
+      },
+      "Hardware y Sistemas Operativos": { 
+        semestre: 5, 
+        abre: [],
+        area: "ingenieria"
+      },
+      "Inglés 2": { 
+        semestre: 5, 
+        abre: ["Inglés 3"],
+        area: "humanidades"
+      },
+      "Ciencia y Tecnología": { 
+        semestre: 6, 
+        abre: [],
+        area: "humanidades"
+      },
+      "Estadística Computacional": { 
+        semestre: 6, 
+        abre: [],
+        area: "matematicas"
+      },
+      "Administración de Empresas": { 
+        semestre: 6, 
+        abre: ["Economía y Finanzas"],
+        area: "ingenieria"
+      },
+      "Modelamiento de Software": { 
+        semestre: 6, 
+        abre: ["Ingeniería de Software", "Ingeniería Web y Móvil"],
+        area: "ingenieria"
+      },
+      "Redes de Computadores": { 
+        semestre: 6, 
+        abre: ["Robótica y Sistemas Autónomos", "Computación Paralela y Distribuida", "Ciberseguridad"],
+        area: "ingenieria"
+      },
+      "Inglés 3": { 
+        semestre: 6, 
+        abre: ["Inglés 4"],
+        area: "humanidades"
+      },
+      "Robótica y Sistemas Autónomos": { 
+        semestre: 7, 
+        abre: [],
+        area: "ingenieria"
+      },
+      "Optimización": { 
+        semestre: 7, 
+        abre: [],
+        area: "matematicas"
+      },
+      "Ingeniería de Software": { 
+        semestre: 7, 
+        abre: ["Taller Ingeniería de Software"],
+        area: "ingenieria"
+      },
+      "Ingeniería Web y Móvil": { 
+        semestre: 7, 
+        abre: ["Ingeniería de Requerimientos"],
+        area: "ingenieria"
+      },
+      "Computación Paralela y Distribuida": { 
+        semestre: 7, 
+        abre: [],
+        area: "programacion"
+      },
+      "Inglés 4": { 
+        semestre: 7, 
+        abre: [],
+        area: "humanidades"
+      },
+      "Economía y Finanzas": { 
+        semestre: 8, 
+        abre: [],
+        area: "ingenieria"
+      },
+      "Ingeniería de Requerimientos": { 
+        semestre: 8, 
+        abre: ["Experiencia del Usuario"],
+        area: "ingenieria"
+      },
+      "Taller de Base de Datos": { 
+        semestre: 8, 
+        abre: [],
+        area: "programacion"
+      },
+      "Ciberseguridad": { 
+        semestre: 8, 
+        abre: [],
+        area: "ingenieria"
+      },
+      "Formación Fundamental 3": { 
+        semestre: 8, 
+        abre: [],
+        area: "humanidades"
+      },
+      "Optativo I": { 
+        semestre: 8, 
+        abre: [],
+        area: "optativos"
+      },
+      "Administración de proyectos informáticos": { 
+        semestre: 9, 
+        abre: ["Taller de Formulación de Proyectos Informáticos"],
+        area: "ingenieria"
+      },
+      "Taller Ingeniería de Software": { 
+        semestre: 9, 
+        abre: [],
+        area: "ingenieria"
+      },
+      "Tecnologías Emergentes": { 
+        semestre: 9, 
+        abre: [],
+        area: "ingenieria"
+      },
+      "Experiencia del Usuario": { 
+        semestre: 9, 
+        abre: [],
+        area: "ingenieria"
+      },
+      "Negocios, innovación y emprendimiento": { 
+        semestre: 9, 
+        abre: [],
+        area: "ingenieria"
+      },
+      "Optativo II": { 
+        semestre: 9, 
+        abre: [],
+        area: "optativos"
+      },
+      "Taller de Formulación de Proyectos Informáticos": { 
+        semestre: 10, 
+        abre: [],
+        area: "ingenieria"
+      },
+      "Seminario de Título": { 
+        semestre: 10, 
+        abre: ["Proyecto de Título"],
+        area: "ingenieria"
+      },
+      "Legislación, Ética y Tecnológica": { 
+        semestre: 10, 
+        abre: [],
+        area: "humanidades"
+      },
+      "Taller de Liderazgo y Trabajo en Equipo": { 
+        semestre: 10, 
+        abre: [],
+        area: "humanidades"
+      },
+      "Optativo III": { 
+        semestre: 10, 
+        abre: [],
+        area: "optativos"
+      },
+      "Proyecto de Título": { 
+        semestre: 11, 
+        abre: [],
+        area: "ingenieria"
+      },
+      "Optativo IV": { 
+        semestre: 11, 
+        abre: [],
+        area: "optativos"
+      }
+    };
+
+    let aprobados = JSON.parse(localStorage.getItem('ramos_aprobados') || '[]');
+    const malla = document.getElementById('malla');
+    const estadoAnterior = new Map();
+    let areaSeleccionada = "all";
+    let busqueda = "";
+
+    const porSemestre = {};
+    for (const [nombre, info] of Object.entries(ramos)) {
+      if (!porSemestre[info.semestre]) porSemestre[info.semestre] = [];
+      porSemestre[info.semestre].push(nombre);
+    }
+
+    const calcularCreditos = () => {
+  let total = 0;
+  let completados = 0;
+  
+  for (const [nombre] of Object.entries(ramos)) {
+    total += creditosRamos[nombre] || 5;
+    if (aprobados.includes(nombre)) {
+      completados += creditosRamos[nombre] || 5;
+    }
+  }
+  
+  // Calcular porcentaje basado en créditos
+  const porcentaje = total > 0 ? Math.round((completados / total) * 100) : 0;
+  
+  return { 
+    total, 
+    completados,
+    porcentaje  // <-- Añadimos el porcentaje aquí
+  };
+};
+
+    const render = () => {
+  malla.innerHTML = "";
+  const totalRamos = Object.keys(ramos).length;
+  
+  // Obtener datos de créditos (incluye porcentaje)
+  const { 
+    total: creditosTotal, 
+    completados: creditosAprobados,
+    porcentaje: porcentajeCreditos
+  } = calcularCreditos();
+  
+  // Actualizar estadísticas
+  document.getElementById('total-ramos').textContent = `Total ramos: ${totalRamos}`;
+  document.getElementById('aprobados-ramos').textContent = `Aprobados: ${aprobados.length}`;
+  document.getElementById('creditos-total').textContent = `Créditos: ${creditosAprobados}/${creditosTotal}`;
+  document.getElementById('porcentaje').textContent = `Progreso: ${porcentajeCreditos}%`;
+
+  let semestresRenderizados = 0;
+  const nuevoEstado = new Map(); // <--- FALTABA ESTA DECLARACIÓN
+  
+  for (let sem = 1; sem <= 11; sem++) {
+    const ramosSemestre = (porSemestre[sem] || []).filter(ramo => {
+      // Filtrar por área
+      if (areaSeleccionada !== "all" && ramos[ramo].area !== areaSeleccionada) {
+        return false;
+      }
+      
+      // Filtrar por búsqueda
+      if (busqueda && !ramo.toLowerCase().includes(busqueda.toLowerCase())) {
+        return false;
+      }
+      
+      return true;
+    });
+    
+    if (ramosSemestre.length === 0) continue;
+    
+    const cont = document.createElement('div');
+    cont.className = 'semestre';
+    const title = document.createElement('h3');
+    title.textContent = `${sem}° Semestre`;
+    cont.appendChild(title);
+
+    ramosSemestre.forEach(ramo => {
+      const div = document.createElement('div');
+      div.textContent = ramo;
+      div.className = 'ramo';
+      div.setAttribute('data-area', ramos[ramo].area);
+      div.setAttribute('data-creditos', creditosRamos[ramo] || 5);
+      
+      const prer = Object.entries(ramos)
+        .filter(([_, info]) => info.abre.includes(ramo))
+        .map(([nombre]) => nombre);
+
+      const desbloqueado = prer.every(nombre => aprobados.includes(nombre));
+      const estadoKey = `${sem}:${ramo}`;
+      nuevoEstado.set(estadoKey, desbloqueado);
+
+      if (aprobados.includes(ramo)) {
+        div.classList.add('aprobado');
+        div.setAttribute('data-tooltip', `🟢 Aprobado (${creditosRamos[ramo] || 5} créditos)\nClic para desmarcar ❌`);
+        div.onclick = () => aprobar(ramo);
+      } else if (sem === 1 || desbloqueado) {
+        div.classList.add('disponible');
+        if (!estadoAnterior.get(estadoKey)) {
+          div.classList.add('desbloqueado');
+          void div.offsetWidth;
+        }
+        div.setAttribute('data-tooltip', `🟡 Disponible (${creditosRamos[ramo] || 5} créditos)\nClic para aprobar ✅`);
+        div.onclick = () => aprobar(ramo);
+      } else {
+        div.classList.add('bloqueado');
+        const faltantes = prer.filter(nombre => !aprobados.includes(nombre));
+        div.setAttribute('data-tooltip', `🔒 Bloqueado (${creditosRamos[ramo] || 5} créditos)\nRequiere: ${faltantes.join(', ') || 'Ninguno'}`);
+      }
+      
+      const creditosDiv = document.createElement('div');
+      creditosDiv.className = 'creditos';
+      creditosDiv.textContent = `${creditosRamos[ramo] || 5} créditos`;
+      div.appendChild(creditosDiv);
+
+      cont.appendChild(div);
+    });
+
+    malla.appendChild(cont);
+    semestresRenderizados++;
+  }
+  
+  // Si no hay resultados de búsqueda
+  if (semestresRenderizados === 0) {
+    const noResults = document.createElement('div');
+    noResults.className = 'no-results';
+    noResults.textContent = 'No se encontraron ramos que coincidan con la búsqueda';
+    malla.appendChild(noResults);
+  }
+
+  const barra = document.getElementById('barraProgreso');
+  const textoBarra = document.getElementById('textoProgreso');
+  // Usamos el porcentaje basado en créditos
+  barra.style.width = porcentajeCreditos + "%";
+  textoBarra.textContent = porcentajeCreditos + "%";
+
+  estadoAnterior.clear();
+  nuevoEstado.forEach((v, k) => estadoAnterior.set(k, v));
+};
+
+    const aprobar = (ramo) => {
+      aprobados = aprobados.includes(ramo)
+        ? aprobados.filter(r => r !== ramo)
+        : [...aprobados, ramo];
+      localStorage.setItem('ramos_aprobados', JSON.stringify(aprobados));
+      render();
+    };
+
+    const resetear = () => {
+      if (confirm("¿Estás seguro de reiniciar todo el progreso?")) {
+        localStorage.removeItem('ramos_aprobados');
+        aprobados = [];
+        render();
+      }
+    };
+
+    const exportar = () => {
+      const blob = new Blob([JSON.stringify(aprobados, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'progreso_malla.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    
+    const importar = () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const contenido = event.target.result;
+            const nuevosAprobados = JSON.parse(contenido);
+            if (!Array.isArray(nuevosAprobados)) {
+              throw new Error("El archivo debe contener un array de ramos aprobados.");
+            }
+
+            // Filtramos solo los ramos que existen en la malla
+            const ramosValidos = nuevosAprobados.filter(ramo => ramos.hasOwnProperty(ramo));
+            // Actualizamos
+            aprobados = ramosValidos;
+            localStorage.setItem('ramos_aprobados', JSON.stringify(aprobados));
+            render();
+            alert(`Progreso importado: ${ramosValidos.length} ramos aprobados.`);
+          } catch (error) {
+            alert(`Error al importar: ${error.message}`);
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    };
+
+    // Filtrado por área
+    document.querySelectorAll('.area-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.area-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        areaSeleccionada = btn.dataset.area;
+        render();
+      });
+    });
+
+    // Búsqueda
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      busqueda = e.target.value;
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
