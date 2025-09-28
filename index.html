@@ -298,6 +298,8 @@
       font-family: var(--font-secondary);
       transition: var(--transition); 
       box-shadow: var(--box-shadow);
+      position: relative;
+      overflow: hidden;
     }
     .btn:hover { 
       transform: translateY(-2px); 
@@ -313,6 +315,23 @@
     }
     .btn.active:hover {
       background: #0da271;
+    }
+    /* Efecto ripple */
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.3s, height 0.3s;
+    }
+    .btn:active::after {
+      width: 100px;
+      height: 100px;
     }
 
     .search-container { 
@@ -564,7 +583,7 @@
       }
     }
 
-    /* Tooltip compacto */
+    /* Tooltip mejorado */
     .ramo:hover::after, .ramo:focus-visible::after {
       content: attr(data-tooltip);
       position: absolute; 
@@ -573,7 +592,7 @@
       transform: translateX(-50%);
       background: #1e293b; 
       color:#f8fafc; 
-      padding: 10px 14px; 
+      padding: 12px 16px; 
       border-radius: 8px; 
       font-size: 12px; 
       white-space: pre-wrap; 
@@ -586,6 +605,7 @@
       box-shadow: 0 6px 16px rgba(0,0,0,.35);
       line-height: 1.4;
       font-family: var(--font-secondary);
+      border: 1px solid rgba(255,255,255,0.1);
     }
 
     /* Tooltip touch */
@@ -625,6 +645,48 @@
       outline: 2px dashed #3b82f6; 
       outline-offset: 2px; 
       z-index: 10;
+    }
+
+    /* ========= TOASTS Y CONFETI ========= */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card-light);
+      color: var(--ink-light);
+      padding: 12px 20px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideInUp 0.3s ease;
+    }
+    body.active .toast {
+      background: var(--card-dark);
+      color: var(--ink-dark);
+    }
+    @keyframes slideInUp {
+      from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+    .toast.success {
+      border-left: 4px solid var(--accent-2);
+    }
+    .toast.info {
+      border-left: 4px solid var(--accent);
+    }
+    
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: var(--accent);
+      opacity: 0;
+      z-index: 9999;
+      pointer-events: none;
     }
 
     @media (max-width: 768px) {
@@ -773,6 +835,9 @@
   <!-- Tooltip touch -->
   <div id="touch-tip" role="status" aria-live="polite"></div>
 
+  <!-- Toasts -->
+  <div id="toast-container"></div>
+
 <script>
 // ========= Utilidades =========
 const normalizarTexto = (str) => (str || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -792,6 +857,58 @@ const swapTheme = () => { const isDark = body.classList.toggle('active'); const 
 
 toggle?.addEventListener('click', swapTheme);
 toggle?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); swapTheme(); } });
+
+// ========= Sistema de Toasts =========
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <ion-icon name="${type === 'success' ? 'checkmark-circle' : 'information-circle'}"></ion-icon>
+    <span>${message}</span>
+  `;
+  
+  document.getElementById('toast-container').appendChild(toast);
+  
+  // Remover después de 3 segundos
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(-20px)';
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }, 3000);
+}
+
+// ========= Efecto Confetti =========
+function createConfetti() {
+  const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+  
+  for (let i = 0; i < 30; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + 'vw';
+    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.opacity = '1';
+    document.body.appendChild(confetti);
+    
+    // Animación
+    const animation = confetti.animate([
+      { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+      { transform: `translateY(${window.innerHeight}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+    ], {
+      duration: 1000 + Math.random() * 1000,
+      easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)'
+    });
+    
+    animation.onfinish = () => {
+      if (confetti.parentNode) {
+        confetti.parentNode.removeChild(confetti);
+      }
+    };
+  }
+}
 
 // ========= Datos: Malla actualizada según archivo de texto =========
 const cursosRaw = [
@@ -946,19 +1063,24 @@ const aprobar = (ramoNombre) => {
     localStorage.setItem('ramos_aprobados_siglas', JSON.stringify(aprobadasSiglas));
     aprobadoPorNombre.clear(); aprobadosNombres().forEach(n => aprobadoPorNombre.add(n));
     render();
+    showToast(`Has desaprobado ${ramoNombre} y sus dependencias`, 'info');
   } else {
     if (estaDisponible(ramoNombre)) {
       if (!aprobadasSiglas.includes(sigla)) aprobadasSiglas.push(sigla);
       localStorage.setItem('ramos_aprobados_siglas', JSON.stringify(aprobadasSiglas));
       aprobadoPorNombre.add(ramoNombre);
       render();
+      showToast(`¡Felicidades! Has aprobado ${ramoNombre}`, 'success');
+      
+      // Efecto confetti solo para aprobaciones (no desaprobaciones)
+      createConfetti();
     } else {
-      alert('No puedes aprobar este ramo hasta completar sus prerrequisitos');
+      showToast('No puedes aprobar este ramo hasta completar sus prerrequisitos', 'info');
     }
   }
 };
 
-const resetear = () => { if (confirm('¿Estás seguro de reiniciar todo el progreso?')) { localStorage.removeItem('ramos_aprobados_siglas'); aprobadasSiglas = []; aprobadoPorNombre.clear(); render(); } };
+const resetear = () => { if (confirm('¿Estás seguro de reiniciar todo el progreso?')) { localStorage.removeItem('ramos_aprobados_siglas'); aprobadasSiglas = []; aprobadoPorNombre.clear(); render(); showToast('Progreso reiniciado correctamente', 'info'); } };
 
 // ======== Render ========
 const syncBoxWidths = () => { $$('.ramo').forEach(el => { const w = Math.round(el.getBoundingClientRect().width); el.style.setProperty('--box-w', w + 'px'); }); };
@@ -1024,26 +1146,22 @@ const render = () => {
       const desbloqueado = prere.every(p => aprobadoPorNombre.has(p));
       const estadoKey = `${sem}:${ramo}`; nuevoEstado.set(estadoKey, desbloqueado);
 
-      const setTooltip = (txt) => { div.setAttribute('data-tooltip', txt); };
+      // Tooltip mejorado con más información (como en v3)
+      const tooltipText = `📚 ${ramo}\n📋 ${info.sigla} | ${creditos} créditos\n🏷️ ${info.area.charAt(0).toUpperCase() + info.area.slice(1)}\n\n${aprobadoPorNombre.has(ramo) ? '✅ Aprobado\nToca para desmarcar' : estaDisponible(ramo) ? '🟡 Disponible\nToca para aprobar' : `🔒 Bloqueado\nRequiere: ${prere.filter(p => !aprobadoPorNombre.has(p)).join(', ') || 'Ninguno'}`}`;
+      
+      div.setAttribute('data-tooltip', tooltipText);
 
       if (aprobadoPorNombre.has(ramo)) {
         div.classList.add('aprobado');
-        setTooltip(`🟢 Aprobado
-Toca para desmarcar ❌`);
         div.onclick = () => aprobar(ramo);
         div.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); aprobar(ramo); } };
       } else if (estaDisponible(ramo)) {
         div.classList.add('disponible');
         if (!estadoAnterior.get(estadoKey)) { div.classList.add('desbloqueado'); void div.offsetWidth; }
-        setTooltip(`🟡 Disponible
-Toca para aprobar ✅`);
         div.onclick = () => aprobar(ramo);
         div.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); aprobar(ramo); } };
       } else {
         div.classList.add('bloqueado');
-        const faltantes = prere.filter(p => !aprobadoPorNombre.has(p));
-        setTooltip(`🔒 Bloqueado
-Requiere: ${faltantes.join(', ') || 'Ninguno'}`);
       }
 
       // Resaltado solo de PRERREQUISITOS
